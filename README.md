@@ -104,6 +104,10 @@ cd ../..
 make up
 ```
 
+Генерация структур и методов из файла pubsub.proto:
+```sh
+make gen-proto
+```
 
 
 
