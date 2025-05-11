@@ -13,7 +13,7 @@ func main() {
 
 	cfg, err := config.Parse(*cfgPath)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Config parse error occured, but default config was used: %v", err)
 	}
 
 	err = server.RunGRPCServer(cfg)

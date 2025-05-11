@@ -45,5 +45,67 @@ func NewSubPub() SubPub {
 }
 ```
 
+## Сервис подписок с использованием пакета subpub. Сервис работает по gRPC. Есть возможность подписаться на события по ключу и опубликовать события по ключу для всех подписчиков. 
+## Protobuf-схема gRPC сервиса: 
+```sh
+import "google/protobuf/empty.proto";
+
+syntax = "proto3";
+
+service PubSub {
+  // Подписка (сервер отправляет поток событий)
+  rpc Subscribe(SubscribeRequest) returns (stream Event);
+
+  // Публикация (классический запрос-ответ)
+  rpc Publish(PublishRequest) returns (google.protobuf.Empty);
+}
+
+message SubscribeRequest {
+  string key = 1;
+}
+
+message PublishRequest {
+  string key = 1;
+  string data = 2;
+}
+
+message Event {
+  string data = 1;
+}
+```
+
+## Как запускать сервис:
+
+Клонируем репозиторий:
+```sh
+git clone https://github.com/V1Ro-Dev/pubSub
+```
+
+Переходим в папку config:
+```sh
+cd deploy/config
+```
+
+Заполняем файл server.yml, в котором необходимо указать:
+```sh
+addr:[Порт, на котором вы хотите запустить grpc сервер]
+max_recv_msg_size: [Максимальный размер, получаемого сообщения]
+max_send_msg_size: [Максимальный размер, отправляемого сообщения]
+max_concurrent_streams: [Максимальное количество конкурентных потоков]
+```
+
+Переходим в корень проекта:
+```sh
+cd ../..
+```
+
+Запускаем приложение:
+```sh
+make up
+```
+
+
+
+
 
 
