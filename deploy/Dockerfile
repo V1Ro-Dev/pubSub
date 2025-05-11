@@ -1,4 +1,20 @@
-FROM ubuntu:latest
-LABEL authors="Матвей"
+FROM golang:1.24 AS builder
 
-ENTRYPOINT ["top", "-b"]
+WORKDIR /subpub_app
+
+COPY subpub/go.mod subpub/go.sum subpub/
+RUN cd subpub && go mod download
+
+COPY subpub /subpub_app/subpub
+
+WORKDIR /subpub_app/subpub/cmd
+
+RUN go build -o main main.go
+
+FROM debian:bookworm-slim
+
+WORKDIR /subpub_app/
+
+COPY --from=builder /subpub_app/subpub/cmd/main .
+
+CMD ["./main"]

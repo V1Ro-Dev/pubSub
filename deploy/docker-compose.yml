@@ -1,1 +1,9 @@
-from 
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: PubSubService
+    ports:
+      - "8081:8081"
+    restart: always
