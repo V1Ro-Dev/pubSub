@@ -16,5 +16,6 @@ FROM debian:bookworm-slim
 WORKDIR /subpub_app/
 
 COPY --from=builder /subpub_app/subpub/cmd/main .
+COPY deploy/config/server.yml ./deploy/config/server.yml
 
-CMD ["./main"]
+CMD ["./main", "-config=./deploy/config/server.yml"]
