@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"log"
-
 	"pubsub/config"
 	"pubsub/internal/delivery/grpc/server"
 )
@@ -21,4 +20,5 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 }

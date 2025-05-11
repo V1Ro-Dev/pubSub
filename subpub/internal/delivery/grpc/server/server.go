@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"google.golang.org/grpc"
 
@@ -16,10 +19,10 @@ import (
 func RunGRPCServer(cfg *config.Config) error {
 	lis, err := net.Listen("tcp", cfg.Addr)
 	if err != nil {
-		log.Fatalln("can't listen port", err)
+		log.Fatalf("can't listen on port: %v", err)
 	}
 
-	server := grpc.NewServer(
+	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(interceptors.ReqIDInterceptor),
 		grpc.StreamInterceptor(interceptors.StreamReqIDInterceptor),
 		grpc.MaxRecvMsgSize(cfg.MaxRecvMsgSize),
@@ -28,15 +31,23 @@ func RunGRPCServer(cfg *config.Config) error {
 	)
 
 	psUseCase := ps.NewPubSub()
+	pb.RegisterPubSubServer(grpcServer, NewPubSubServer(&psUseCase))
 
-	pb.RegisterPubSubServer(server, NewPubSubServer(&psUseCase))
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 
-	fmt.Println(fmt.Sprintf("starting server at %s", cfg.Addr))
-	err = server.Serve(lis)
-	if err != nil {
-		log.Fatalln(fmt.Sprintf("couldn't start server: %v", err))
-		return err
-	}
+	go func() {
+		fmt.Printf("starting server at %s\n", cfg.Addr)
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatalf("couldn't start server: %v", err)
+		}
+	}()
+
+	<-stop
+	fmt.Println("\nshutting down server gracefully...")
+
+	grpcServer.GracefulStop()
+	fmt.Println("server stopped")
 
 	return nil
 }
