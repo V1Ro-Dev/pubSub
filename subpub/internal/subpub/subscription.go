@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"pubsub/subpub/utils"
+	"pubsub/utils"
 )
 
 type SubscriptionImpl struct {
